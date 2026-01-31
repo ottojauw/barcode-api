@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Display</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .barcode-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .barcode-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            display: inline-block;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .barcode-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .loading {
+            color: #667eea;
+            font-size: 18px;
+            padding: 40px;
+        }
+
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .info-section {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-section h3 {
+            color: #1976D2;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .info-value {
+            color: #333;
+            word-break: break-all;
+        }
+
+        .controls {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .example-links {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .example-links h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .example-links a {
+            display: block;
+            color: #667eea;
+            text-decoration: none;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        .example-links a:hover {
+            text-decoration: underline;
+        }
+
+        .usage-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 2px solid #e9ecef;
+        }
+
+        .usage-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .usage-block {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .usage-block:last-child {
+            margin-bottom: 0;
+        }
+
+        .usage-block h4 {
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .usage-block p {
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .code-example {
+            display: block;
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .usage-note {
+            color: #666;
+            font-style: italic;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .param-table {
+            margin-top: 15px;
+        }
+
+        .param-row {
+            display: grid;
+            grid-template-columns: 100px 1fr auto;
+            gap: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        .param-name {
+            font-weight: 700;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .param-desc {
+            color: #555;
+            font-size: 13px;
+        }
+
+        .param-example {
+            color: #666;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .barcode-container {
+                padding: 20px;
+            }
+
+            .param-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .param-example {
+                width: fit-content;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Barcode Display</h1>
+        <p class="subtitle">Powered by Vercel API</p>
+
+        <div id="barcodeSection" class="barcode-section">
+            <div class="loading">Loading barcode...</div>
+        </div>
+
+        <div id="infoSection" style="display: none;" class="info-section">
+            <h3>Barcode Information</h3>
+            <div class="info-grid">
+                <span class="info-label">Value:</span>
+                <span class="info-value" id="infoValue">-</span>
+                <span class="info-label">Format:</span>
+                <span class="info-value" id="infoFormat">-</span>
+                <span class="info-label">Width:</span>
+                <span class="info-value" id="infoWidth">-</span>
+                <span class="info-label">Height:</span>
+                <span class="info-value" id="infoHeight">-</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="form-group">
+                <label for="barcodeValue">Barcode Value:</label>
+                <input type="text" id="barcodeValue" placeholder="Enter barcode value (e.g., 123456789)">
+            </div>
+
+            <div class="form-group">
+                <label for="barcodeFormat">Format:</label>
+                <select id="barcodeFormat">
+                    <option value="CODE128">CODE128</option>
+                    <option value="CODE39">CODE39</option>
+                    <option value="EAN13">EAN13</option>
+                    <option value="EAN8">EAN8</option>
+                    <option value="UPC">UPC (UPCA)</option>
+                    <option value="ITF14">ITF14</option>
+                    <option value="MSI">MSI</option>
+                    <option value="PHARMACODE">Pharmacode</option>
+                    <option value="CODABAR">Codabar</option>
+                </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label for="barcodeWidth">Width:</label>
+                    <input type="number" id="barcodeWidth" value="2" min="1" max="5">
+                </div>
+
+                <div class="form-group">
+                    <label for="barcodeHeight">Height:</label>
+                    <input type="number" id="barcodeHeight" value="100" min="50" max="300">
+                </div>
+            </div>
+
+            <button onclick="generateBarcode()">Generate New Barcode</button>
+        </div>
+
+        <div class="example-links">
+            <h3>Try These Examples:</h3>
+            <a href="?value=123456789&format=CODE128">Standard CODE128: 123456789</a>
+            <a href="?value=5901234123457&format=EAN13">EAN13: 5901234123457</a>
+            <a href="?value=012345678905&format=UPC">UPC: 012345678905</a>
+            <a href="?value=HELLO&format=CODE39">CODE39: HELLO</a>
+            <a href="?value=98765&format=MSI&width=3&height=150">MSI with custom size: 98765</a>
+        </div>
+
+        <div class="usage-section">
+            <h3>📖 Usage Guide</h3>
+            
+            <div class="usage-block">
+                <h4>Without Parameters (Default)</h4>
+                <p>Simply open the page without any parameters to see a default barcode:</p>
+                <code class="code-example">barcode-display.html</code>
+                <p class="usage-note">This will display a CODE128 barcode with value "123456789"</p>
+            </div>
+
+            <div class="usage-block">
+                <h4>With Query Parameters</h4>
+                <p>Pass parameters in the URL to customize the barcode:</p>
+                <code class="code-example">barcode-display.html?value=YOUR_VALUE&format=CODE128</code>
+                
+                <div class="param-table">
+                    <div class="param-row">
+                        <span class="param-name">value</span>
+                        <span class="param-desc">The data to encode (required)</span>
+                        <span class="param-example">value=123456789</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-name">format</span>
+                        <span class="param-desc">Barcode type (optional, default: CODE128)</span>
+                        <span class="param-example">format=EAN13</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-name">width</span>
+                        <span class="param-desc">Bar width (optional, default: 2)</span>
+                        <span class="param-example">width=3</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-name">height</span>
+                        <span class="param-desc">Barcode height in pixels (optional, default: 100)</span>
+                        <span class="param-example">height=150</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="usage-block">
+                <h4>Full Example URLs</h4>
+                <code class="code-example">barcode-display.html?value=123456789</code>
+                <code class="code-example">barcode-display.html?value=5901234123457&format=EAN13</code>
+                <code class="code-example">barcode-display.html?value=PRODUCT123&format=CODE39&width=3&height=120</code>
+            </div>
+
+            <div class="usage-block">
+                <h4>Embedding in Your Website</h4>
+                <p>Use an iframe to embed barcodes in your website:</p>
+                <code class="code-example">&lt;iframe src="barcode-display.html?value=123456789&format=CODE128" 
+        width="400" height="300" frameborder="0"&gt;&lt;/iframe&gt;</code>
+            </div>
+
+            <div class="usage-block">
+                <h4>API Endpoint</h4>
+                <p>For direct API access (returns JSON with base64 image):</p>
+                <code class="code-example">https://barcode-api-two.vercel.app/api/barcode?value=123456789</code>
+                <p class="usage-note">Perfect for use in applications, scripts, or automated systems</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_ENDPOINT = 'https://barcode-api-two.vercel.app/api/barcode';
+
+        // Get URL parameters
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                value: params.get('value') || '',
+                format: params.get('format') || 'CODE128',
+                width: params.get('width') || '2',
+                height: params.get('height') || '100',
+                displayValue: params.get('displayValue') || 'true'
+            };
+        }
+
+        // Load barcode from API
+        async function loadBarcode(params) {
+            const barcodeSection = document.getElementById('barcodeSection');
+            const infoSection = document.getElementById('infoSection');
+
+            // Show loading
+            barcodeSection.innerHTML = '<div class="loading">Loading barcode...</div>';
+            infoSection.style.display = 'none';
+
+            try {
+                // Build API URL
+                const apiUrl = new URL(API_ENDPOINT);
+                Object.keys(params).forEach(key => {
+                    if (params[key]) {
+                        apiUrl.searchParams.append(key, params[key]);
+                    }
+                });
+
+                // Fetch from API
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (data.success) {
+                    // Display barcode
+                    barcodeSection.innerHTML = `
+                        <div class="barcode-container">
+                            <img src="${data.data}" alt="Barcode: ${data.value}">
+                        </div>
+                    `;
+
+                    // Show info
+                    infoSection.style.display = 'block';
+                    document.getElementById('infoValue').textContent = data.value;
+                    document.getElementById('infoFormat').textContent = data.format.toUpperCase();
+                    document.getElementById('infoWidth').textContent = params.width;
+                    document.getElementById('infoHeight').textContent = params.height;
+                } else {
+                    throw new Error(data.error || 'Failed to generate barcode');
+                }
+            } catch (error) {
+                barcodeSection.innerHTML = `
+                    <div class="error">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Generate barcode from form
+        function generateBarcode() {
+            const value = document.getElementById('barcodeValue').value;
+            const format = document.getElementById('barcodeFormat').value;
+            const width = document.getElementById('barcodeWidth').value;
+            const height = document.getElementById('barcodeHeight').value;
+
+            if (!value) {
+                alert('Please enter a barcode value');
+                return;
+            }
+
+            // Update URL and reload
+            const newUrl = `?value=${encodeURIComponent(value)}&format=${format}&width=${width}&height=${height}`;
+            window.location.search = newUrl;
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = getUrlParams();
+
+            // If no value in URL, show default
+            if (!params.value) {
+                params.value = '123456789';
+                params.format = 'CODE128';
+            }
+
+            // Populate form fields
+            document.getElementById('barcodeValue').value = params.value;
+            document.getElementById('barcodeFormat').value = params.format;
+            document.getElementById('barcodeWidth').value = params.width;
+            document.getElementById('barcodeHeight').value = params.height;
+
+            // Load barcode
+            loadBarcode(params);
+        });
+
+        // Allow Enter key to submit
+        document.getElementById('barcodeValue').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                generateBarcode();
+            }
+        });
+    </script>
+</body>
+</html>
