@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode API</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #667eea;
+        }
+        code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .test-form {
+            display: grid;
+            gap: 15px;
+        }
+        input, select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+        }
+        .barcode-display {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .barcode-display img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background: white;
+        }
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        .param-table th, .param-table td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .param-table th {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Barcode Generation API</h1>
+        
+        <div class="section">
+            <h2>API Endpoint</h2>
+            <p>Generate barcodes by making GET requests to:</p>
+            <div class="code-block">GET /?value=123456789&format=CODE128&width=2&height=100</div>
+            
+            <h3>Query Parameters</h3>
+            <table class="param-table">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Description</th>
+                        <th>Default</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>value</code></td>
+                        <td>The data to encode (required)</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td><code>format</code></td>
+                        <td>Barcode format (CODE128, EAN13, UPC, CODE39, etc.)</td>
+                        <td>CODE128</td>
+                    </tr>
+                    <tr>
+                        <td><code>width</code></td>
+                        <td>Width of individual bars</td>
+                        <td>2</td>
+                    </tr>
+                    <tr>
+                        <td><code>height</code></td>
+                        <td>Height of barcode in pixels</td>
+                        <td>100</td>
+                    </tr>
+                    <tr>
+                        <td><code>displayValue</code></td>
+                        <td>Show text below barcode (true/false)</td>
+                        <td>true</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Response Format</h3>
+            <div class="code-block">{
+  "success": true,
+  "data": "data:image/png;base64,iVBORw0KGgoAAAANS...",
+  "format": "CODE128",
+  "value": "123456789"
+}</div>
+        </div>
+
+        <div class="section">
+            <h2>Test the API</h2>
+            <div class="test-form">
+                <div>
+                    <label>Barcode Value:</label>
+                    <input type="text" id="testValue" value="123456789" placeholder="Enter barcode value">
+                </div>
+                <div>
+                    <label>Format:</label>
+                    <select id="testFormat">
+                        <option value="CODE128">CODE128</option>
+                        <option value="CODE39">CODE39</option>
+                        <option value="EAN13">EAN13</option>
+                        <option value="EAN8">EAN8</option>
+                        <option value="UPC">UPC</option>
+                        <option value="ITF14">ITF14</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Width:</label>
+                    <input type="number" id="testWidth" value="2" min="1" max="5">
+                </div>
+                <div>
+                    <label>Height:</label>
+                    <input type="number" id="testHeight" value="100" min="50" max="200">
+                </div>
+                <button onclick="testAPI()">Generate Barcode</button>
+            </div>
+            
+            <div id="result" class="result" style="display: none;">
+                <h3>API Response:</h3>
+                <pre id="responseJson" style="background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto;"></pre>
+                <div class="barcode-display">
+                    <img id="barcodeImage" alt="Generated barcode">
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Usage Examples</h2>
+            
+            <h3>JavaScript (Fetch API)</h3>
+            <div class="code-block">fetch('/?value=123456789&format=CODE128&width=2&height=100')
+  .then(response => response.json())
+  .then(data => {
+    console.log('Base64 Image:', data.data);
+    // Use the base64 image
+    const img = document.createElement('img');
+    img.src = data.data;
+    document.body.appendChild(img);
+  });</div>
+
+            <h3>Python</h3>
+            <div class="code-block">import requests
+import base64
+
+response = requests.get(
+    'http://localhost:8000/',
+    params={
+        'value': '123456789',
+        'format': 'CODE128',
+        'width': 2,
+        'height': 100
+    }
+)
+
+data = response.json()
+base64_image = data['data']
+print(base64_image)</div>
+
+            <h3>cURL</h3>
+            <div class="code-block">curl "/?value=123456789&format=CODE128&width=2&height=100"</div>
+        </div>
+    </div>
+
+    <script>
+        // API Handler
+        function generateBarcode(params) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    const value = params.value || '';
+                    const format = params.format || 'CODE128';
+                    const width = parseInt(params.width) || 2;
+                    const height = parseInt(params.height) || 100;
+                    const displayValue = params.displayValue !== 'false';
+
+                    if (!value) {
+                        reject({ success: false, error: 'Value parameter is required' });
+                        return;
+                    }
+
+                    JsBarcode(canvas, value, {
+                        format: format,
+                        width: width,
+                        height: height,
+                        displayValue: displayValue
+                    });
+
+                    const base64 = canvas.toDataURL('image/png');
+                    
+                    resolve({
+                        success: true,
+                        data: base64,
+                        format: format,
+                        value: value
+                    });
+                } catch (error) {
+                    reject({
+                        success: false,
+                        error: error.message
+                    });
+                }
+            });
+        }
+
+        // Check if this is an API request (has value parameter)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('value')) {
+            // This is an API request
+            generateBarcode(Object.fromEntries(urlParams))
+                .then(result => {
+                    document.body.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                })
+                .catch(error => {
+                    document.body.innerHTML = `<pre>${JSON.stringify(error, null, 2)}</pre>`;
+                });
+        }
+
+        // Test function for the form
+        async function testAPI() {
+            const value = document.getElementById('testValue').value;
+            const format = document.getElementById('testFormat').value;
+            const width = document.getElementById('testWidth').value;
+            const height = document.getElementById('testHeight').value;
+
+            try {
+                const result = await generateBarcode({
+                    value: value,
+                    format: format,
+                    width: width,
+                    height: height
+                });
+
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('responseJson').textContent = JSON.stringify(result, null, 2);
+                document.getElementById('barcodeImage').src = result.data;
+            } catch (error) {
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('responseJson').textContent = JSON.stringify(error, null, 2);
+                document.getElementById('barcodeImage').src = '';
+            }
+        }
+    </script>
+</body>
+</html>
