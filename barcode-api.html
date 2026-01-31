@@ -279,13 +279,30 @@ print(base64_image)</div>
         // Check if this is an API request (has value parameter)
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('value')) {
-            // This is an API request
+            // This is an API request - return JSON only
             generateBarcode(Object.fromEntries(urlParams))
                 .then(result => {
-                    document.body.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                    // Clear all HTML and return pure JSON
+                    document.open();
+                    document.write(JSON.stringify(result, null, 2));
+                    document.close();
+                    document.body.style.margin = '0';
+                    document.body.style.padding = '20px';
+                    document.body.style.fontFamily = 'monospace';
+                    document.body.style.whiteSpace = 'pre-wrap';
+                    document.body.style.background = '#1e1e1e';
+                    document.body.style.color = '#d4d4d4';
                 })
                 .catch(error => {
-                    document.body.innerHTML = `<pre>${JSON.stringify(error, null, 2)}</pre>`;
+                    document.open();
+                    document.write(JSON.stringify(error, null, 2));
+                    document.close();
+                    document.body.style.margin = '0';
+                    document.body.style.padding = '20px';
+                    document.body.style.fontFamily = 'monospace';
+                    document.body.style.whiteSpace = 'pre-wrap';
+                    document.body.style.background = '#1e1e1e';
+                    document.body.style.color = '#d4d4d4';
                 });
         }
 
